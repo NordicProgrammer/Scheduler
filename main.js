@@ -34,7 +34,7 @@ async function getClass(className) {
 
   return result;
 }
-function schedule(priorityClasses, secondaryClasses) {
+function schedule(yearLongClasses, priorityClasses, secondaryClasses) {
   var scheduleArr = [
     ["", "", "", ""],
     ["", "", "", ""],
@@ -42,11 +42,15 @@ function schedule(priorityClasses, secondaryClasses) {
     ["", "", "", ""],
   ];
   class scheduleClass {
-    constructor(className, classes) {
+    constructor(className, classes, isYearLong) {
       this.className = className;
       this.classes = classes;
+      this.yearLong = isYearLong;
     }
     seeAndSwitch() {
+      if(this.yearLong === true){
+        return false
+      }else{
       var uhOhFlag = false;
       for (let index = 0; index < this.classes.length; index++) {
         const element = this.classes[index];
@@ -72,6 +76,18 @@ function schedule(priorityClasses, secondaryClasses) {
       }
     }
   }
+  }
+  for (let index = 0; index < yearLongClasses.length; index++) {
+    const element = yearLongClasses[index];
+    for (let i = 0; i < element.classes.length; i++) {
+      const e = element.classes[i];
+      scheduleArr[e.period-1][e.startQuarter-1] = new scheduleClass(element.className, element.classes, true)
+      scheduleArr[e.period-1][e.endQuarter-1] = new scheduleClass(element.className, element.classes, true)
+
+      
+    }
+    
+  }
   for (let index = 0; index < priorityClasses.length; index++) {
     const fillClass = priorityClasses[index];
     var uhOhFlag = false;
@@ -82,9 +98,9 @@ function schedule(priorityClasses, secondaryClasses) {
         scheduleArr[indClass.period - 1][indClass.endQuarter - 1] === ""
       ) {
         scheduleArr[indClass.period - 1][indClass.startQuarter - 1] =
-          new scheduleClass(fillClass.className, fillClass.classes);
+          new scheduleClass(fillClass.className, fillClass.classes, false);
         scheduleArr[indClass.period - 1][indClass.endQuarter - 1] =
-          new scheduleClass(fillClass.className, fillClass.classes);
+          new scheduleClass(fillClass.className, fillClass.classes, false);
         break;
       } else {
         if (i < fillClass.classes.length) {
@@ -102,9 +118,9 @@ function schedule(priorityClasses, secondaryClasses) {
           ].seeAndSwitch() === true
         ) {
           scheduleArr[element.period - 1][element.startQuarter - 1] =
-            new scheduleClass(fillClass.className, fillClass.classes);
+            new scheduleClass(fillClass.className, fillClass.classes, false);
           scheduleArr[element.period - 1][element.endQuarter - 1] =
-            new scheduleClass(fillClass.className, fillClass.classes);
+            new scheduleClass(fillClass.className, fillClass.classes, false);
           break;
         } else {
         }
@@ -113,13 +129,27 @@ function schedule(priorityClasses, secondaryClasses) {
   }
   return scheduleArr;
 }
+function displaySchedule(scheduleArr){
+  for (let i = 0; i < scheduleArr.length; i++) {
+    const period = scheduleArr[i];
+    var printLine = ""
+    for (let index = 0; index < period.length; index++) {
+      const cl = period[index];
+      var printLine = printLine.concat(cl.className, " | ")
+      
+    }
+    console.log(printLine)
+  }
+}
 async function run() {
   var primClasses = [];
+  var yearLongClasses = [];
+  yearLongClasses.push(await getClass("Symphonic Band"))
   primClasses.push(await getClass("Int Math 3"));
   primClasses.push(await getClass("English 10"));
   primClasses.push(await getClass("Honors English 10"));
   primClasses.push(await getClass("French 1"));
 
-  console.log(schedule(primClasses));
+displaySchedule(schedule(yearLongClasses, primClasses));
 }
 run();
